@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
   s.name             = 'DPPageViewController'
   s.version          = '0.1.0'
-  s.summary          = 'A short description of DPPageViewController.'
+  s.summary          = '一个类似网易新闻页面切换的控件.'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -18,14 +18,18 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+一个类似网易新闻页面切换的控件.用两行代码就可以实现
+
+DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Page View Controller" viewControllers:@[vc1,vc2,vc3,vc4]];
+[self.navigationController pushViewController:pagevc animated:YES];
+
                        DESC
 
-  s.homepage         = 'https://github.com/413655409@qq.com/DPPageViewController'
+  s.homepage         = 'https://github.com/DaoPinWong/DPPageViewController'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { '413655409@qq.com' => '413655409@qq.com' }
-  s.source           = { :git => 'https://github.com/413655409@qq.com/DPPageViewController.git', :tag => s.version.to_s }
+  s.author           = { 'dpwong' => '413655409@qq.com' }
+  s.source           = { :git => 'https://github.com/DaoPinWong/DPPageViewController.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '8.0'

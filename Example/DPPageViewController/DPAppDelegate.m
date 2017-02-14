@@ -7,12 +7,61 @@
 //
 
 #import "DPAppDelegate.h"
+#import "DPPageViewController.h"
 
 @implementation DPAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    
+    self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    
+    UIViewController *vc1 = [UIViewController new];
+    vc1.title = @"first";
+    vc1.view.backgroundColor = [UIColor redColor];
+    
+    UIViewController *vc2 = [UIViewController new];
+    vc2.title = @"second";
+    vc2.view.backgroundColor = [UIColor blueColor];
+    
+    UIViewController *vc3 = [UIViewController new];
+    vc3.title = @"third";
+    vc3.view.backgroundColor = [UIColor yellowColor];
+    
+    UIViewController *vc4 = [UIViewController new];
+    vc4.title = @"fourth";
+    vc4.view.backgroundColor = [UIColor lightGrayColor];
+    
+    DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Page View Controller" viewControllers:@[vc1,vc2,vc3,vc4]];
+    
+    pagevc.selectTitleZoomMultiple = 1.5;
+    pagevc.commonColor = [UIColor blueColor];
+    pagevc.selectColor = [UIColor redColor];
+    
+    UIView *middleView = [UIView new];
+    middleView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 50);
+    UILabel *middleLabel = [UILabel new];
+    middleLabel.textAlignment = NSTextAlignmentCenter;
+    middleLabel.text = @"Middle View";
+    [middleView addSubview:middleLabel];
+    middleLabel.frame = middleView.bounds;
+    pagevc.middleView = middleView;
+    
+    
+    UIView *bottomView = [UIView new];
+    bottomView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 50);
+    UILabel *bottomLabel = [UILabel new];
+    bottomLabel.textAlignment = NSTextAlignmentCenter;
+    bottomLabel.text = @"Bottom View";
+    [bottomView addSubview:bottomLabel];
+    bottomLabel.frame = bottomView.bounds;
+    pagevc.bottomView = bottomView;
+    
+    self.window.rootViewController = [[UINavigationController alloc] initWithRootViewController:pagevc];
+    [self.window makeKeyAndVisible];
+
+    
     return YES;
 }
 
