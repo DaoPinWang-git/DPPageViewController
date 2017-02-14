@@ -10,5 +10,7 @@ target 'DPPageViewController_Example' do
   pod 'Expecta'
   pod 'FBSnapshotTestCase'
   pod 'Expecta+Snapshots'
+  
+  pod 'Masonry', '~> 1.0.2'
   end
 end

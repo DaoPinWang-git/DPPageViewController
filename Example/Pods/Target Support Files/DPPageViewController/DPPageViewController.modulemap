@@ -1,0 +1,6 @@
+framework module DPPageViewController {
+  umbrella header "DPPageViewController-umbrella.h"
+
+  export *
+  module * { export * }
+}
