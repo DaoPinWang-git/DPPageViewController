@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		153B5E681E54437500A9A7C9 /* 2017-02-15 15_58_51.gif in Resources */ = {isa = PBXBuildFile; fileRef = 153B5E671E54437500A9A7C9 /* 2017-02-15 15_58_51.gif */; };
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58F195388D20070C39A /* CoreGraphics.framework */; };
 		6003F592195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
@@ -36,6 +37,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		153B5E671E54437500A9A7C9 /* 2017-02-15 15_58_51.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "2017-02-15 15_58_51.gif"; sourceTree = "<group>"; };
 		188D7A11E468442F83A082E8 /* DPPageViewController.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = DPPageViewController.podspec; path = ../DPPageViewController.podspec; sourceTree = "<group>"; };
 		2FF8C69FA97CD95DE92361A7 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		437D9821A9CEBD09D8F3191C /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
@@ -143,6 +145,7 @@
 		6003F594195388D20070C39A /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				153B5E671E54437500A9A7C9 /* 2017-02-15 15_58_51.gif */,
 				6003F595195388D20070C39A /* DPPageViewController-Info.plist */,
 				6003F596195388D20070C39A /* InfoPlist.strings */,
 				6003F599195388D20070C39A /* main.m */,
@@ -275,6 +278,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */,
+				153B5E681E54437500A9A7C9 /* 2017-02-15 15_58_51.gif in Resources */,
 				71719F9F1E33DC2100824A3D /* LaunchScreen.storyboard in Resources */,
 				6003F5A9195388D20070C39A /* Images.xcassets in Resources */,
 				6003F598195388D20070C39A /* InfoPlist.strings in Resources */,

@@ -18,22 +18,26 @@
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     
     UIViewController *vc1 = [UIViewController new];
-    vc1.title = @"first";
+    vc1.title = @"First";
     vc1.view.backgroundColor = [UIColor redColor];
     
     UIViewController *vc2 = [UIViewController new];
-    vc2.title = @"second";
+    vc2.title = @"Second";
     vc2.view.backgroundColor = [UIColor blueColor];
     
     UIViewController *vc3 = [UIViewController new];
-    vc3.title = @"third";
+    vc3.title = @"Third";
     vc3.view.backgroundColor = [UIColor yellowColor];
     
     UIViewController *vc4 = [UIViewController new];
-    vc4.title = @"fourth";
+    vc4.title = @"Fourth";
     vc4.view.backgroundColor = [UIColor lightGrayColor];
     
-    DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Page View Controller" viewControllers:@[vc1,vc2,vc3,vc4]];
+    UIViewController *vc5 = [UIViewController new];
+    vc5.title = @"Fifth";
+    vc5.view.backgroundColor = [UIColor brownColor];
+    
+    DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Page View Controller" viewControllers:@[vc1,vc2,vc3,vc4,vc5]];
     
     pagevc.selectTitleZoomMultiple = 1.5;
     pagevc.commonColor = [UIColor blueColor];
