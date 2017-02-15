@@ -20,6 +20,17 @@ it, simply add the following line to your Podfile:
 pod "DPPageViewController"
 ```
 
+## Usage
+```ruby
+#import "DPPageViewController.h"
+
+
+DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Page View Controller" viewControllers:@[vc1,vc2,vc3,vc4]];
+[self.navigationController pushViewController:pagevc animated:YES];
+
+
+```
+
 ## Author
 
 413655409@qq.com, 413655409@qq.com
