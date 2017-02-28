@@ -21,19 +21,82 @@ pod "DPPageViewController"
 ```
 
 ## Usage
+
+### Quick to use
 ```ruby
 #import "DPPageViewController.h"
 
 
-DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Page View Controller" viewControllers:@[vc1,vc2,vc3,vc4]];
+DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Page View Controller" viewControllers:@[vc1,vc2,vc3,vc4,vc5]];
 [self.navigationController pushViewController:pagevc animated:YES];
 
 
 ```
 
-## Author
+![](https://github.com/DaoPinWong/DPPageViewController/blob/master/Example/DPPageViewController/2017-02-15%2015_58_51.gif?raw=true)
 
-413655409@qq.com, 413655409@qq.com
+### property  
+```ruby
+
+/// 中间的view使用时直接赋值
+@property (nonatomic, strong) UIView *middleView;
+
+/// 底部的view使用时直接赋值
+@property (nonatomic, strong) UIView *bottomView;
+
+/// 当前页的索引
+@property (nonatomic, assign) NSInteger displayIndex;
+
+/// 当前显示的view
+@property (nonatomic, strong) UIView *displayView;
+
+@property (nonatomic, strong, readonly) NSArray *viewControllers;
+
+/// 普通的颜色
+@property (nonatomic, strong) UIColor *commonColor;
+
+/// 选中的颜色
+@property (nonatomic, strong) UIColor *selectColor;
+
+/// title字体大小
+@property (nonatomic, assign) CGFloat titleSize;
+
+/// 选中的title放大倍数 （默认1）
+@property (nonatomic, assign) CGFloat selectTitleZoomMultiple;
+
+```
+
+### More  
+
+```ruby
+
+    pagevc.selectTitleZoomMultiple = 1.5;
+    pagevc.commonColor = [UIColor blueColor];
+    pagevc.selectColor = [UIColor redColor];
+    
+    UIView *middleView = [UIView new];
+    middleView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 50);
+    UILabel *middleLabel = [UILabel new];
+    middleLabel.textAlignment = NSTextAlignmentCenter;
+    middleLabel.text = @"Middle View";
+    [middleView addSubview:middleLabel];
+    middleLabel.frame = middleView.bounds;
+    pagevc.middleView = middleView;
+    
+    
+    UIView *bottomView = [UIView new];
+    bottomView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 50);
+    UILabel *bottomLabel = [UILabel new];
+    bottomLabel.textAlignment = NSTextAlignmentCenter;
+    bottomLabel.text = @"Bottom View";
+    [bottomView addSubview:bottomLabel];
+    bottomLabel.frame = bottomView.bounds;
+    pagevc.bottomView = bottomView;
+```
+![](https://github.com/DaoPinWong/DPPageViewController/blob/master/Example/DPPageViewController/2017-02-15%2016_32_29.gif?raw=true)
+
+## Author
+dpwong, 413655409@qq.com
 
 ## License
 
