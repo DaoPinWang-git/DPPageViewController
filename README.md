@@ -50,7 +50,7 @@ DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Pag
 /// 当前显示的view
 @property (nonatomic, strong) UIView *displayView;
 
-@property (nonatomic, strong, readonly) NSArray *viewControllers;
+@property (nonatomic, copy, readonly) NSArray *viewControllers;
 
 /// 普通的颜色
 @property (nonatomic, strong) UIColor *commonColor;
