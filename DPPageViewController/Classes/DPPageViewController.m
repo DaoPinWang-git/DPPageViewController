@@ -67,7 +67,7 @@
         
 
         
-        _viewControllers = [NSArray arrayWithArray:viewControllers];
+        _viewControllers = viewControllers;
         
         [self view];
     }
