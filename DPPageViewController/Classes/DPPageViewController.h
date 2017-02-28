@@ -10,9 +10,9 @@
 
 
 @interface DPPageViewController : UIViewController
-@property (nonatomic, strong) UIView *headView;
-@property (nonatomic, strong) UIScrollView *headScrollView;
-@property (nonatomic, strong) UIScrollView *bodyView;
+@property (nonatomic, strong, readonly) UIView *headView;
+@property (nonatomic, strong, readonly) UIScrollView *headScrollView;
+@property (nonatomic, strong, readonly) UIScrollView *bodyView;
 
 
 /// 中间的view使用时直接赋值
@@ -26,6 +26,7 @@
 
 /// 当前显示的view
 @property (nonatomic, strong) UIView *displayView;
+
 //@property (nonatomic, weak) id<DPPageViewControllerDelegate> delegate;
 
 @property (nonatomic, copy, readonly) NSArray *viewControllers;

@@ -42,6 +42,7 @@
 @end
 
 @implementation DPPageViewController
+@synthesize viewControllers = _viewControllers;
 
 
 - (id)initWithTitle:(NSString *)title viewControllers:(NSArray *)viewControllers{
@@ -173,7 +174,7 @@
     
 }
     
-- (NSArray *)getViewControllers{
+- (NSArray *)viewControllers{
     return _viewControllers;
 }
 
@@ -298,14 +299,14 @@
 
 - (void)creationView{
     
-    self.headView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, ITEM_HEIGHT)];
+    _headView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, ITEM_HEIGHT)];
     self.headView.clipsToBounds = YES;
     self.headView.backgroundColor = [UIColor whiteColor];
     self.headView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     self.headView.hidden = self.viewControllers.count == 1;
     [self.view addSubview:self.headView];
     
-    self.headScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, self.headView.frame.size.width, self.headView.frame.size.height)];
+    _headScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, self.headView.frame.size.width, self.headView.frame.size.height)];
     [self.headScrollView setShowsHorizontalScrollIndicator:NO];
     [self.headScrollView setShowsVerticalScrollIndicator:NO];
 
@@ -331,7 +332,7 @@
     
     
     
-    self.bodyView = [[UIScrollView alloc] initWithFrame:CGRectMake(0,
+    _bodyView = [[UIScrollView alloc] initWithFrame:CGRectMake(0,
                                                                    CGRectGetMaxY(self.middleSuperView.frame),
                                                                    self.view.frame.size.width,
                                                                    self.view.frame.size.height - CGRectGetMaxY(self.middleSuperView.frame))];

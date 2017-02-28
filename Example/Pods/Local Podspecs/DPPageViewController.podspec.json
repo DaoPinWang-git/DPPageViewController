@@ -1,18 +1,18 @@
 {
   "name": "DPPageViewController",
   "version": "0.1.0",
-  "summary": "A short description of DPPageViewController.",
-  "description": "TODO: Add long description of the pod here.",
-  "homepage": "https://github.com/413655409@qq.com/DPPageViewController",
+  "summary": "一个类似网易新闻页面切换的控件.",
+  "description": "一个类似网易新闻页面切换的控件.用两行代码就可以实现\n\nDPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@\"Page View Controller\" viewControllers:@[vc1,vc2,vc3,vc4,vc5]];\n[self.navigationController pushViewController:pagevc animated:YES];",
+  "homepage": "https://github.com/DaoPinWong/DPPageViewController",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
   },
   "authors": {
-    "413655409@qq.com": "413655409@qq.com"
+    "dpwong": "413655409@qq.com"
   },
   "source": {
-    "git": "https://github.com/413655409@qq.com/DPPageViewController.git",
+    "git": "https://github.com/DaoPinWong/DPPageViewController.git",
     "tag": "0.1.0"
   },
   "platforms": {
