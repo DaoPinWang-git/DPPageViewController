@@ -66,13 +66,13 @@
         
         self.itemWidth = 0;
         self.itemWidth = [[UIScreen mainScreen] bounds].size.width / viewControllers.count;
-        self.itemWidth = self.itemWidth < self.minItemWidth ? self.minItemWidth : self.itemWidth;
+        
         
 
         
         _viewControllers = viewControllers;
         
-        [self view];
+//        [self view];
     }
     return self;
 }
@@ -160,8 +160,26 @@
     
 }
 
+- (UIView *)middleSuperView{
+    if (_middleSuperView == nil) {
+        _middleSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, self.view.frame.size.width, 0)];
+        _middleSuperView.clipsToBounds = YES;
+        _middleSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        [self.view addSubview:_middleSuperView];
+    }
+    return _middleSuperView;
+}
 
 
+- (UIView *)bottomSuperView{
+    if (_bottomSuperView == nil) {
+        _bottomSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, self.view.frame.size.width, 0)];
+        _bottomSuperView.clipsToBounds = YES;
+        _bottomSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        [self.view addSubview:_bottomSuperView];
+    }
+    return _bottomSuperView;
+}
 
 
 - (void)viewDidLoad {
@@ -171,6 +189,8 @@
 
     self.view.backgroundColor = [UIColor whiteColor];
 
+    self.itemWidth = self.itemWidth < self.minItemWidth ? self.minItemWidth : self.itemWidth;
+    
     [self creationView];
     [self reloadView];
     
@@ -324,19 +344,7 @@
     self.markLine.backgroundColor = self.selectColor;
     self.markLine.tag = 999;
     [self.headScrollView addSubview:self.markLine];
-    
-    self.middleSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, self.view.frame.size.width, 0)];
-    self.middleSuperView.clipsToBounds = YES;
-    self.middleSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    [self.view addSubview:self.middleSuperView];
-    
-    
-    self.bottomSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, self.view.frame.size.width, 0)];
-    self.bottomSuperView.clipsToBounds = YES;
-    self.bottomSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    [self.view addSubview:self.bottomSuperView];
-    
-    
+
     
     _bodyView = [[UIScrollView alloc] initWithFrame:CGRectMake(0,
                                                                    CGRectGetMaxY(self.middleSuperView.frame),

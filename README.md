@@ -70,6 +70,8 @@ DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Pag
 
 ```ruby
 
+    pagevc.itemHeight = 40;
+    pagevc.minItemWidth = 70;
     pagevc.selectTitleZoomMultiple = 1.5;
     pagevc.commonColor = [UIColor blueColor];
     pagevc.selectColor = [UIColor redColor];
