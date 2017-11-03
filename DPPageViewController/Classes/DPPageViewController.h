@@ -8,12 +8,12 @@
 
 @import UIKit;
 
-
 @interface DPPageViewController : UIViewController
 @property (nonatomic, strong, readonly) UIView *headView;
 @property (nonatomic, strong, readonly) UIScrollView *headScrollView;
 @property (nonatomic, strong, readonly) UIScrollView *bodyView;
-
+/// 当前显示的view
+@property (nonatomic, strong, readonly) UIView *displayView;
 
 /// 中间的view使用时直接赋值
 @property (nonatomic, strong) UIView *middleView;
@@ -24,8 +24,11 @@
 /// 当前页的索引
 @property (nonatomic, assign) NSInteger displayIndex;
 
-/// 当前显示的view
-@property (nonatomic, strong) UIView *displayView;
+/// 按钮高度 (默认50)
+@property (nonatomic, assign) CGFloat itemHeight;
+
+/// 按钮最小宽度 (默认90)
+@property (nonatomic, assign) CGFloat minItemWidth;
 
 //@property (nonatomic, weak) id<DPPageViewControllerDelegate> delegate;
 
@@ -46,6 +49,7 @@
 
 - (id)initWithTitle:(NSString *)title viewControllers:(NSArray *)viewControllers;
 
+- (void)reloadView;
 
 //- (void)items:(NSArray *)items delegate:(id<DPPageViewControllerDelegate>) delegate;
 
@@ -54,21 +58,5 @@
 
 
 
-
-//@protocol DPPageViewControllerDelegate<NSObject>
-//
-//@required
-//
-//- (UIView *)pageViewController:(DPPageViewController *)pageViewController index:(NSInteger)index;
-//
-//@optional
-//- (void)pageViewController:(DPPageViewController *)pageViewController doubleTapItem:(UIView *)bodySubview;
-//
-//- (void)pageViewController:(DPPageViewController *)pageViewController toBodySubview:(UIView *)bodySubview index:(NSInteger)index;
-//
-//- (void)pageViewController:(DPPageViewController *)pageViewController didScroll:(UIScrollView *)scrollView;
-//
-//
-//@end
 
 

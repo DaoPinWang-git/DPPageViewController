@@ -9,9 +9,7 @@
 #import "DPPageViewController.h"
 #import "Masonry.h"
 
-#define ITEM_HEIGHT 50
-#define Min_ITEM_WIDTH  90
-#define HEADVIEW_BUTTON_GAP 15
+
 
 
 #define RGBA(R/*红*/, G/*绿*/, B/*蓝*/, A/*透明*/) \
@@ -42,6 +40,7 @@
 @end
 
 @implementation DPPageViewController
+@synthesize displayView = _displayView;
 @synthesize viewControllers = _viewControllers;
 
 
@@ -62,9 +61,12 @@
         self.titleSize = 14;
         self.selectTitleZoomMultiple = 1.0;
         
+        self.itemHeight = 50;
+        self.minItemWidth = 90;
+        
         self.itemWidth = 0;
         self.itemWidth = [[UIScreen mainScreen] bounds].size.width / viewControllers.count;
-        self.itemWidth = self.itemWidth < Min_ITEM_WIDTH ? Min_ITEM_WIDTH : self.itemWidth;
+        self.itemWidth = self.itemWidth < self.minItemWidth ? self.minItemWidth : self.itemWidth;
         
 
         
@@ -173,7 +175,11 @@
     [self reloadView];
     
 }
-    
+
+- (UIView *)displayView{
+    return _displayView;
+}
+
 - (NSArray *)viewControllers{
     return _viewControllers;
 }
@@ -299,7 +305,7 @@
 
 - (void)creationView{
     
-    _headView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, ITEM_HEIGHT)];
+    _headView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.itemHeight)];
     self.headView.clipsToBounds = YES;
     self.headView.backgroundColor = [UIColor whiteColor];
     self.headView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -319,13 +325,13 @@
     self.markLine.tag = 999;
     [self.headScrollView addSubview:self.markLine];
     
-    self.middleSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, ITEM_HEIGHT, self.view.frame.size.width, 0)];
+    self.middleSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, self.view.frame.size.width, 0)];
     self.middleSuperView.clipsToBounds = YES;
     self.middleSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:self.middleSuperView];
     
     
-    self.bottomSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, ITEM_HEIGHT, self.view.frame.size.width, 0)];
+    self.bottomSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, self.view.frame.size.width, 0)];
     self.bottomSuperView.clipsToBounds = YES;
     self.bottomSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [self.view addSubview:self.bottomSuperView];
@@ -360,7 +366,7 @@
         if (self.viewControllers.count == 1) {
             make.height.mas_equalTo(0);
         }else{
-            make.height.mas_equalTo(ITEM_HEIGHT);
+            make.height.mas_equalTo(self.itemHeight);
         }
     }];
     
@@ -442,7 +448,7 @@
     but.tag = index + 1;
     
     CGFloat itemWidth = self.itemWidth;
-    but.frame = CGRectMake(self.allHeadItemX, 0, itemWidth, ITEM_HEIGHT);
+    but.frame = CGRectMake(self.allHeadItemX, 0, itemWidth, self.itemHeight);
     self.allHeadItemX += itemWidth;
 
     [self.headScrollView addSubview:but];
@@ -494,10 +500,6 @@
 
 
 
-
-
-
-
 - (void)headVoewMoveToItem:(UIButton *)item animated:(BOOL)animated{
     
     CGFloat CItemPointX = CGRectGetMidX([item.superview convertRect:item.frame toView:self.view]);
@@ -539,13 +541,22 @@
     float vButtonOrigin = index * self.bodyView.frame.size.width;
     [self.bodyView setContentOffset:CGPointMake(vButtonOrigin, self.bodyView.contentOffset.y) animated:animated];
     
+    UIViewController *disVC = [self.viewControllers objectAtIndex:self.displayIndex];
+    [disVC viewWillDisappear:YES];
+    [disVC viewDidDisappear:YES];
+    
     self.displayIndex = index;
     for (UIView *view in self.bodyView.subviews) {
         if (view.tag == index + 1) {
-            self.displayView = view;
+            _displayView = view;
             break;
         }
     }
+    
+    UIViewController *apperVC = [self.viewControllers objectAtIndex:self.displayIndex];
+    [apperVC viewWillAppear:YES];
+    [apperVC viewDidAppear:YES];
+    
 //    if ([self.delegate respondsToSelector:@selector(ZLY_DirectoryView:toBodySubview:index:)]) {
 //        [self.delegate ZLY_DirectoryView:self toBodySubview:self.displayView index:index];
 //    }
@@ -666,13 +677,22 @@
     
     
     [self headVoewMoveToIndex:index animated:YES];
+    
+    UIViewController *disVC = [self.viewControllers objectAtIndex:self.displayIndex];
+    [disVC viewWillDisappear:YES];
+    [disVC viewDidDisappear:YES];
+    
     self.displayIndex = index;
     for (UIView *view in self.bodyView.subviews) {
         if (view.tag == index + 1) {
-            self.displayView = view;
+            _displayView = view;
             break;
         }
     }
+    
+    UIViewController *apperVC = [self.viewControllers objectAtIndex:self.displayIndex];
+    [apperVC viewWillAppear:YES];
+    [apperVC viewDidAppear:YES];
     
 //    if ([self.delegate respondsToSelector:@selector(ZLY_DirectoryView:toBodySubview:index:)]) {
 //        [self.delegate ZLY_DirectoryView:self toBodySubview:self.displayView index:index];
