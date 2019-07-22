@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'DPPageViewController'
-  s.version          = '1.0.1'
+  s.version          = '1.0.2'
   s.summary          = '一个类似网易新闻页面切换的控件.'
 
 # This description is used to generate tags and improve search results.

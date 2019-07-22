@@ -8,7 +8,7 @@
 
 #import "DPAppDelegate.h"
 #import "DPPageViewController.h"
-
+#import "DPTableViewController.h"
 @implementation DPAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -17,11 +17,11 @@
     
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     
-    UIViewController *vc1 = [UIViewController new];
+    DPTableViewController *vc1 = [DPTableViewController new];
     vc1.title = @"First";
     vc1.view.backgroundColor = [UIColor redColor];
     
-    UIViewController *vc2 = [UIViewController new];
+    DPTableViewController *vc2 = [DPTableViewController new];
     vc2.title = @"Second";
     vc2.view.backgroundColor = [UIColor blueColor];
     
@@ -36,8 +36,14 @@
     UIViewController *vc5 = [UIViewController new];
     vc5.title = @"Fifth";
     vc5.view.backgroundColor = [UIColor brownColor];
+
+
     
     DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Page View Controller" viewControllers:@[vc1,vc2,vc3,vc4,vc5]];
+
+    vc1.pageViewController = pagevc;
+    vc2.pageViewController = pagevc;
+
     
     pagevc.itemHeight = 40;
     pagevc.minItemWidth = 70;
@@ -45,6 +51,16 @@
     pagevc.selectTitleZoomMultiple = 1.5;
     pagevc.commonColor = [UIColor blueColor];
     pagevc.selectColor = [UIColor redColor];
+
+    UIView *topView = [UIView new];
+    topView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 250);
+    UILabel *topLabel = [UILabel new];
+    topLabel.textAlignment = NSTextAlignmentCenter;
+    topLabel.text = @"Top View";
+    [topView addSubview:topLabel];
+    topLabel.frame = topView.bounds;
+    pagevc.topView = topView;
+    
     
     UIView *middleView = [UIView new];
     middleView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 50);

@@ -18,6 +18,9 @@
 
 
 @interface DPPageViewController ()<UIScrollViewDelegate>
+@property (nonatomic, strong) UIView *topSuperView;
+@property (nonatomic, strong) UIPanGestureRecognizer *moveTopViewByGesture;
+@property (nonatomic, assign) CGPoint moveTopViewLastPoint;
 @property (nonatomic, strong) UIView *middleSuperView;
 @property (nonatomic, strong) UIView *bottomSuperView;
 @property (nonatomic, strong) UIImageView *markLine;
@@ -72,11 +75,48 @@
         
         _viewControllers = viewControllers;
         
-//        [self view];
+        [self view];
     }
     return self;
 }
 
+- (void)setTopView:(UIView *)topView{
+    [self setTopView:topView animate:NO];
+}
+
+- (void)setTopView:(UIView *)topView animate:(BOOL)animate{
+    if (topView == nil) {
+        [UIView animateWithDuration:animate ? 0.3 : 0 animations:^{
+            [self.topSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
+                make.height.mas_equalTo(0);
+
+            }];
+            [self.view layoutIfNeeded];
+
+
+        } completion:^(BOOL finished) {
+            [self->_topView removeFromSuperview];
+            self->_topView = topView;
+        }];
+    }else{
+
+        [_topView removeFromSuperview];
+        _topView = topView;
+        [self.topSuperView addSubview:topView];
+        [topView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.edges.equalTo(self.topSuperView);
+        }];
+        [UIView animateWithDuration:animate ? 0.3 : 0 animations:^{
+
+            [self.topSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
+                make.height.mas_equalTo(topView.bounds.size.height);
+            }];
+
+            [self.view layoutIfNeeded];
+        }];
+
+    }
+}
 
 - (void)setMiddleView:(UIView *)middleView{
     [self setMiddleView:middleView animate:NO];
@@ -89,14 +129,13 @@
         [UIView animateWithDuration:animate ? 0.3 : 0 animations:^{
             [self.middleSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
                 make.height.mas_equalTo(0);
-                [self.view layoutIfNeeded];
-
             }];
-            
+            [self.view layoutIfNeeded];
+
            
         } completion:^(BOOL finished) {
-            [_middleView removeFromSuperview];
-            _middleView = middleView;
+            [self->_middleView removeFromSuperview];
+            self->_middleView = middleView;
         }];
     }else{
         [_middleView removeFromSuperview];
@@ -131,14 +170,14 @@
         [UIView animateWithDuration:animate ? 0.3 : 0 animations:^{
             [self.bottomSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
                 make.height.mas_equalTo(0);
-                [self.view layoutIfNeeded];
-                
+                make.bottom.equalTo(self.view).offset(0);
+
             }];
-            
-            
+            [self.view layoutIfNeeded];
+
         } completion:^(BOOL finished) {
-            [_bottomView removeFromSuperview];
-            _bottomView = bottomView;
+            [self->_bottomView removeFromSuperview];
+            self->_bottomView = bottomView;
         }];
     }else{
         [_bottomView removeFromSuperview];
@@ -147,10 +186,17 @@
         [bottomView mas_makeConstraints:^(MASConstraintMaker *make) {
             make.edges.equalTo(self.bottomSuperView);
         }];
+        self.bottomSuperView.backgroundColor = bottomView.backgroundColor;
         [UIView animateWithDuration:animate ? 0.3 : 0 animations:^{
             
             [self.bottomSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
                 make.height.mas_equalTo(bottomView.bounds.size.height);
+                if (@available(iOS 11.0, *)) {
+                    UIWindow *window = [UIApplication sharedApplication].windows.firstObject;
+                    make.bottom.equalTo(self.view).offset(-window.safeAreaInsets.bottom);
+                } else {
+                    make.bottom.equalTo(self.view).offset(0);
+                }
             }];
             
             [self.view layoutIfNeeded];
@@ -159,6 +205,20 @@
     }
     
 }
+
+- (UIView *)topSuperView{
+    if (_topSuperView == nil) {
+        _topSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 0)];
+        _topSuperView.clipsToBounds = YES;
+        _topSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        [self.view addSubview:_topSuperView];
+        _moveTopViewByGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveTopViewByGesture:)];
+
+        [_topSuperView addGestureRecognizer:_moveTopViewByGesture];
+    }
+    return _topSuperView;
+}
+
 
 - (UIView *)middleSuperView{
     if (_middleSuperView == nil) {
@@ -366,11 +426,18 @@
         make.height.mas_equalTo(0.5);
     }];
 
-    
+    [self.topSuperView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.right.and.left.equalTo(self.view);
+        make.top.equalTo(self.view);
+
+//        make.top.and.right.and.left.equalTo(self.view);
+        make.height.mas_equalTo(100);
+    }];
     
     
     [self.headView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.and.right.and.left.equalTo(self.view);
+        make.right.and.left.equalTo(self.view);
+        make.top.equalTo(self.topSuperView.mas_bottom);
         if (self.viewControllers.count == 1) {
             make.height.mas_equalTo(0);
         }else{
@@ -408,6 +475,50 @@
     
 }
 
+- (void)moveTopViewByScrollView:(UIScrollView *)scrollView{
+    CGFloat h = self.topSuperView.frame.origin.y - scrollView.contentOffset.y;
+    BOOL isReset = YES;
+    if (fabs(h) > self.topSuperView.frame.size.height) {
+        h = -self.topSuperView.frame.size.height;
+        isReset = NO;
+    }
+    if (h > 0) {
+        h = 0;
+        isReset = NO;
+    }
+    if (isReset) {
+        scrollView.contentOffset = CGPointZero;
+    }
+
+    [self.topSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(self.view).offset(h);
+    }];
+}
+
+- (void)moveTopViewByGesture:(UIPanGestureRecognizer *)gesture{
+    if (gesture.state == UIGestureRecognizerStateBegan) {
+        self.moveTopViewLastPoint = [gesture translationInView:self.view];
+    }else if (gesture.state == UIGestureRecognizerStateChanged){
+        CGPoint point = [gesture translationInView:self.view];
+
+        CGFloat distance = self.moveTopViewLastPoint.y - point.y;
+        CGFloat h = self.topSuperView.frame.origin.y - distance;
+
+        if (fabs(h) > self.topSuperView.frame.size.height) {
+            h = -self.topSuperView.frame.size.height;
+        }
+        if (h > 0) {
+            h = 0;
+        }
+
+        [self.topSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.view).offset(h);
+        }];
+
+        self.moveTopViewLastPoint = point;
+
+    }
+}
 
 
 - (void)reloadView{
@@ -460,6 +571,9 @@
     self.allHeadItemX += itemWidth;
 
     [self.headScrollView addSubview:but];
+    if ([self.delegate respondsToSelector:@selector(pageViewController:titleItem:)]) {
+        [self.delegate pageViewController:self titleItem:but];
+    }
     
     
     if (index == self.displayIndex) {
@@ -548,30 +662,32 @@
     }
     float vButtonOrigin = index * self.bodyView.frame.size.width;
     [self.bodyView setContentOffset:CGPointMake(vButtonOrigin, self.bodyView.contentOffset.y) animated:animated];
-    
+    [self changeDisplayViewController:index];
+
+}
+
+- (void)changeDisplayViewController:(NSInteger)index{
+
     UIViewController *disVC = [self.viewControllers objectAtIndex:self.displayIndex];
     [disVC viewWillDisappear:YES];
     [disVC viewDidDisappear:YES];
-    
+
     self.displayIndex = index;
+    if ([self.delegate respondsToSelector:@selector(pageViewController:displayIndex:)]) {
+        [self.delegate pageViewController:self displayIndex:index];
+    }
+
     for (UIView *view in self.bodyView.subviews) {
         if (view.tag == index + 1) {
             _displayView = view;
             break;
         }
     }
-    
+
     UIViewController *apperVC = [self.viewControllers objectAtIndex:self.displayIndex];
     [apperVC viewWillAppear:YES];
     [apperVC viewDidAppear:YES];
-    
-//    if ([self.delegate respondsToSelector:@selector(ZLY_DirectoryView:toBodySubview:index:)]) {
-//        [self.delegate ZLY_DirectoryView:self toBodySubview:self.displayView index:index];
-//    }
-    
-    
 }
-
 
 
 
@@ -580,10 +696,6 @@
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
     [self changeView:scrollView.contentOffset.x];
-//    if ([self.delegate respondsToSelector:@selector(ZLY_DirectoryView:didScroll:)]) {
-//        [self.delegate ZLY_DirectoryView:self didScroll:scrollView];
-//    }
-//    
 }
 
 
@@ -686,25 +798,7 @@
     
     [self headVoewMoveToIndex:index animated:YES];
     
-    UIViewController *disVC = [self.viewControllers objectAtIndex:self.displayIndex];
-    [disVC viewWillDisappear:YES];
-    [disVC viewDidDisappear:YES];
-    
-    self.displayIndex = index;
-    for (UIView *view in self.bodyView.subviews) {
-        if (view.tag == index + 1) {
-            _displayView = view;
-            break;
-        }
-    }
-    
-    UIViewController *apperVC = [self.viewControllers objectAtIndex:self.displayIndex];
-    [apperVC viewWillAppear:YES];
-    [apperVC viewDidAppear:YES];
-    
-//    if ([self.delegate respondsToSelector:@selector(ZLY_DirectoryView:toBodySubview:index:)]) {
-//        [self.delegate ZLY_DirectoryView:self toBodySubview:self.displayView index:index];
-//    }
+    [self changeDisplayViewController:index];
     
 }
 

@@ -7,6 +7,22 @@
 //
 
 @import UIKit;
+@class DPPageViewController;
+
+@protocol DPPageViewControllerDelegate <NSObject>
+
+@optional
+
+- (void)pageViewController:(DPPageViewController *)pageViewController displayIndex:(NSInteger)index;
+
+/**
+ 自定义小title
+ */
+- (void)pageViewController:(DPPageViewController *)pageViewController titleItem:(UIButton *)item;
+
+
+@end
+
 
 @interface DPPageViewController : UIViewController
 @property (nonatomic, strong, readonly) UIView *headView;
@@ -14,6 +30,9 @@
 @property (nonatomic, strong, readonly) UIScrollView *bodyView;
 /// 当前显示的view
 @property (nonatomic, strong, readonly) UIView *displayView;
+
+/// 顶部的view使用时直接赋值（位置在headView上面，会根据滑动移动）
+@property (nonatomic, strong) UIView *topView;
 
 /// 中间的view使用时直接赋值
 @property (nonatomic, strong) UIView *middleView;
@@ -30,7 +49,7 @@
 /// 按钮最小宽度 (默认90)
 @property (nonatomic, assign) CGFloat minItemWidth;
 
-//@property (nonatomic, weak) id<DPPageViewControllerDelegate> delegate;
+@property (nonatomic, weak) id<DPPageViewControllerDelegate> delegate;
 
 @property (nonatomic, copy, readonly) NSArray *viewControllers;
 
@@ -50,6 +69,9 @@
 - (id)initWithTitle:(NSString *)title viewControllers:(NSArray *)viewControllers;
 
 - (void)reloadView;
+
+// 移动topView
+- (void)moveTopViewByScrollView:(UIScrollView *)scrollView;
 
 //- (void)items:(NSArray *)items delegate:(id<DPPageViewControllerDelegate>) delegate;
 
