@@ -70,87 +70,68 @@
         self.itemWidth = 0;
         self.itemWidth = [[UIScreen mainScreen] bounds].size.width / viewControllers.count;
         
-        
+        _topSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 0)];
+        self.topSuperView.clipsToBounds = YES;
+        self.topSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        _moveTopViewByGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveTopViewByGesture:)];
+
+        [self.topSuperView addGestureRecognizer:self.moveTopViewByGesture];
+
+
+        _middleSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, [UIScreen mainScreen].bounds.size.width, 0)];
+        self.middleSuperView.clipsToBounds = YES;
+        self.middleSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+
+        _bottomSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, [UIScreen mainScreen].bounds.size.width, 0)];
+        self.bottomSuperView.clipsToBounds = YES;
+        self.bottomSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 
         
         _viewControllers = viewControllers;
-        
-        [self view];
+//        调用后可能会照成[UIApplication sharedApplication]。keyWindow为空
+//        [self view];
     }
     return self;
 }
 
+
 - (void)setTopView:(UIView *)topView{
-    [self setTopView:topView animate:NO];
-}
+    [_topView removeFromSuperview];
+    _topView = topView;
 
-- (void)setTopView:(UIView *)topView animate:(BOOL)animate{
     if (topView == nil) {
-        [UIView animateWithDuration:animate ? 0.3 : 0 animations:^{
-            [self.topSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.height.mas_equalTo(0);
-
-            }];
-            [self.view layoutIfNeeded];
-
-
-        } completion:^(BOOL finished) {
-            [self->_topView removeFromSuperview];
-            self->_topView = topView;
+        [self.topSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(0);
         }];
+
     }else{
 
-        [_topView removeFromSuperview];
-        _topView = topView;
         [self.topSuperView addSubview:topView];
         [topView mas_makeConstraints:^(MASConstraintMaker *make) {
             make.edges.equalTo(self.topSuperView);
         }];
-        [UIView animateWithDuration:animate ? 0.3 : 0 animations:^{
-
-            [self.topSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.height.mas_equalTo(topView.bounds.size.height);
-            }];
-
-            [self.view layoutIfNeeded];
+        [self.topSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(topView.bounds.size.height);
         }];
-
     }
 }
 
 - (void)setMiddleView:(UIView *)middleView{
-    [self setMiddleView:middleView animate:NO];
-}
 
-- (void)setMiddleView:(UIView *)middleView animate:(BOOL)animate{
-    
-    
+    [_middleView removeFromSuperview];
+    _middleView = middleView;
+
     if (middleView == nil) {
-        [UIView animateWithDuration:animate ? 0.3 : 0 animations:^{
-            [self.middleSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.height.mas_equalTo(0);
-            }];
-            [self.view layoutIfNeeded];
-
-           
-        } completion:^(BOOL finished) {
-            [self->_middleView removeFromSuperview];
-            self->_middleView = middleView;
+        [self.middleSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(0);
         }];
     }else{
-        [_middleView removeFromSuperview];
-        _middleView = middleView;
         [self.middleSuperView addSubview:middleView];
         [middleView mas_makeConstraints:^(MASConstraintMaker *make) {
             make.edges.equalTo(self.middleSuperView);
         }];
-        [UIView animateWithDuration:animate ? 0.3 : 0 animations:^{
-            
-            [self.middleSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.height.mas_equalTo(middleView.bounds.size.height);
-            }];
-            
-            [self.view layoutIfNeeded];
+        [self.middleSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(middleView.bounds.size.height);
         }];
         
     }
@@ -160,85 +141,39 @@
 
 
 - (void)setBottomView:(UIView *)bottomView{
-    [self setBottomView:bottomView animate:NO];
-}
 
-- (void)setBottomView:(UIView *)bottomView animate:(BOOL)animate{
-    
-    
+    [_bottomView removeFromSuperview];
+    _bottomView = bottomView;
+
     if (bottomView == nil) {
-        [UIView animateWithDuration:animate ? 0.3 : 0 animations:^{
-            [self.bottomSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.height.mas_equalTo(0);
-                make.bottom.equalTo(self.view).offset(0);
+        [self.bottomSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(0);
+            make.bottom.equalTo(self.view).offset(0);
 
-            }];
-            [self.view layoutIfNeeded];
-
-        } completion:^(BOOL finished) {
-            [self->_bottomView removeFromSuperview];
-            self->_bottomView = bottomView;
         }];
+
     }else{
-        [_bottomView removeFromSuperview];
-        _bottomView = bottomView;
         [self.bottomSuperView addSubview:bottomView];
         [bottomView mas_makeConstraints:^(MASConstraintMaker *make) {
             make.edges.equalTo(self.bottomSuperView);
         }];
         self.bottomSuperView.backgroundColor = bottomView.backgroundColor;
-        [UIView animateWithDuration:animate ? 0.3 : 0 animations:^{
-            
-            [self.bottomSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
-                make.height.mas_equalTo(bottomView.bounds.size.height);
+        [self.bottomSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
+            make.height.mas_equalTo(bottomView.bounds.size.height);
+            if (self.bottomSuperView.superview) {
                 if (@available(iOS 11.0, *)) {
                     UIWindow *window = [UIApplication sharedApplication].windows.firstObject;
                     make.bottom.equalTo(self.view).offset(-window.safeAreaInsets.bottom);
                 } else {
                     make.bottom.equalTo(self.view).offset(0);
                 }
-            }];
-            
-            [self.view layoutIfNeeded];
+            }
+
         }];
+
         
     }
     
-}
-
-- (UIView *)topSuperView{
-    if (_topSuperView == nil) {
-        _topSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 0)];
-        _topSuperView.clipsToBounds = YES;
-        _topSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        [self.view addSubview:_topSuperView];
-        _moveTopViewByGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveTopViewByGesture:)];
-
-        [_topSuperView addGestureRecognizer:_moveTopViewByGesture];
-    }
-    return _topSuperView;
-}
-
-
-- (UIView *)middleSuperView{
-    if (_middleSuperView == nil) {
-        _middleSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, self.view.frame.size.width, 0)];
-        _middleSuperView.clipsToBounds = YES;
-        _middleSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        [self.view addSubview:_middleSuperView];
-    }
-    return _middleSuperView;
-}
-
-
-- (UIView *)bottomSuperView{
-    if (_bottomSuperView == nil) {
-        _bottomSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, self.view.frame.size.width, 0)];
-        _bottomSuperView.clipsToBounds = YES;
-        _bottomSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        [self.view addSubview:_bottomSuperView];
-    }
-    return _bottomSuperView;
 }
 
 
@@ -417,6 +352,14 @@
     self.bodyView.bounces = NO;
     self.bodyView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:self.bodyView];
+
+
+    [self.view addSubview:self.topSuperView];
+
+    [self.view addSubview:self.middleSuperView];
+
+    [self.view addSubview:self.bottomSuperView];
+
     
     UIImageView *lineImage = [[UIImageView alloc] init];
     lineImage.backgroundColor = [UIColor lightGrayColor];
@@ -429,7 +372,7 @@
     [self.topSuperView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.and.left.equalTo(self.view);
         make.top.equalTo(self.view);
-        make.height.mas_equalTo(0);
+        make.height.mas_equalTo(self.topView.bounds.size.height);
     }];
     
     
@@ -452,7 +395,7 @@
     [self.middleSuperView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.and.left.equalTo(self.view);
         make.top.equalTo(self.headView.mas_bottom);
-        make.height.mas_equalTo(0);
+        make.height.mas_equalTo(self.middleView.bounds.size.height);
     }];
     
     [self.bodyView mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -464,8 +407,14 @@
     
     
     [self.bottomSuperView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.right.and.left.and.bottom.equalTo(self.view);
-        make.height.mas_equalTo(0);
+        make.right.and.left.equalTo(self.view);
+        make.height.mas_equalTo(self.bottomView.bounds.size.height);
+        if (@available(iOS 11.0, *)) {
+            UIWindow *window = [UIApplication sharedApplication].windows.firstObject;
+            make.bottom.equalTo(self.view).offset(-window.safeAreaInsets.bottom);
+        } else {
+            make.bottom.equalTo(self.view).offset(0);
+        }
     }];
     
   
