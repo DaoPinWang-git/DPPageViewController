@@ -429,9 +429,7 @@
     [self.topSuperView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.and.left.equalTo(self.view);
         make.top.equalTo(self.view);
-
-//        make.top.and.right.and.left.equalTo(self.view);
-        make.height.mas_equalTo(100);
+        make.height.mas_equalTo(0);
     }];
     
     
