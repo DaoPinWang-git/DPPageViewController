@@ -70,12 +70,28 @@ DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Pag
 
 ```ruby
 
+	// move TopView
+    vc1.pageViewController = pagevc;
+    vc2.pageViewController = pagevc;
+
+
     pagevc.itemHeight = 40;
     pagevc.minItemWidth = 70;
     pagevc.selectTitleZoomMultiple = 1.5;
     pagevc.commonColor = [UIColor blueColor];
     pagevc.selectColor = [UIColor redColor];
     
+
+    UIView *topView = [UIView new];
+    topView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 250);
+    UILabel *topLabel = [UILabel new];
+    topLabel.textAlignment = NSTextAlignmentCenter;
+    topLabel.text = @"Top View";
+    [topView addSubview:topLabel];
+    topLabel.frame = topView.bounds;
+    pagevc.topView = topView;
+
+
     UIView *middleView = [UIView new];
     middleView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 50);
     UILabel *middleLabel = [UILabel new];
@@ -95,7 +111,7 @@ DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Pag
     bottomLabel.frame = bottomView.bounds;
     pagevc.bottomView = bottomView;
 ```
-![](https://github.com/DaoPinWong/DPPageViewController/blob/master/Example/DPPageViewController/2017-02-15%2016_32_29.gif?raw=true)
+![](https://github.com/DaoPinWong/DPPageViewController/blob/master/Example/DPPageViewController/2019-07-22 17_50_00.gif?raw=true)
 
 ## Author
 dpwong, 413655409@qq.com
