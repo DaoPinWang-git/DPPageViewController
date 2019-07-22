@@ -111,7 +111,7 @@ DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Pag
     bottomLabel.frame = bottomView.bounds;
     pagevc.bottomView = bottomView;
 ```
-![](https://github.com/DaoPinWong/DPPageViewController/blob/master/Example/DPPageViewController/2019-07-22 17_50_00.gif?raw=true)
+![](https://github.com/DaoPinWong/DPPageViewController/blob/master/Example/DPPageViewController/2019-07-22%2017_50_00.gif)
 
 ## Author
 dpwong, 413655409@qq.com
