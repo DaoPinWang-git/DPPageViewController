@@ -35,7 +35,7 @@ DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Pag
 
 ![](https://github.com/DaoPinWong/DPPageViewController/blob/master/Example/DPPageViewController/2017-02-15%2015_58_51.gif?raw=true)
 
-### property  
+### Property  
 ```ruby
 
 /// 中间的view使用时直接赋值
@@ -64,6 +64,23 @@ DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Pag
 /// 选中的title放大倍数 （默认1）
 @property (nonatomic, assign) CGFloat selectTitleZoomMultiple;
 
+```
+
+### Delegate  
+```ruby
+@protocol DPPageViewControllerDelegate <NSObject>
+
+@optional
+
+- (void)pageViewController:(DPPageViewController *)pageViewController displayIndex:(NSInteger)index;
+
+/**
+ 自定义小title
+ */
+- (void)pageViewController:(DPPageViewController *)pageViewController titleItem:(UIButton *)item;
+
+
+@end
 ```
 
 ### More  
