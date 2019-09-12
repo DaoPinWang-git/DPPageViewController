@@ -15,6 +15,23 @@
 #define RGBA(R/*红*/, G/*绿*/, B/*蓝*/, A/*透明*/) \
 [UIColor colorWithRed:R/255.f green:G/255.f blue:B/255.f alpha:A]
 
+@interface UIView (DPAdditions)
+- (UIImage *)dp_imageForView ;
+@end
+
+@implementation UIView(DPAdditions)
+// 截取一屏高度的图片
+- (UIImage *)dp_imageForView {
+
+    CGSize size = CGSizeMake(self.frame.size.width, [UIScreen mainScreen].bounds.size.height);
+    UIGraphicsBeginImageContextWithOptions(size, NO, 0.0);
+    [self.layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return image;
+}
+
+@end
 
 
 @interface DPPageViewController ()<UIScrollViewDelegate>
@@ -23,7 +40,6 @@
 @property (nonatomic, assign) CGPoint moveTopViewLastPoint;
 @property (nonatomic, strong) UIView *middleSuperView;
 @property (nonatomic, strong) UIView *bottomSuperView;
-@property (nonatomic, strong) UIImageView *markLine;
 
 @property (nonatomic, assign) CGFloat commonR;
 @property (nonatomic, assign) CGFloat commonG;
@@ -39,60 +55,144 @@
 @property (nonatomic, assign) CGFloat allHeadItemX;
 @property (nonatomic, assign) CGFloat itemWidth;
 
-
 @end
 
 @implementation DPPageViewController
 @synthesize displayView = _displayView;
 @synthesize viewControllers = _viewControllers;
+@synthesize titleSize = _titleSize;
 
-
-- (id)initWithTitle:(NSString *)title viewControllers:(NSArray *)viewControllers{
-    self = [self init];
+- (instancetype)init
+{
+    self = [super init];
     if (self) {
-        self.title = title;
-        self.commonR = 139;
-        self.commonG = 139;
-        self.commonB = 139;
-        self.commonA = 1.0;
-        
-        self.selectR = 241;
-        self.selectG = 75;
-        self.selectB = 60;
-        self.selectA = 1.0;
-        
-        self.titleSize = 14;
-        self.selectTitleZoomMultiple = 1.0;
-        
-        self.itemHeight = 50;
-        self.minItemWidth = 90;
-        
-        self.itemWidth = 0;
-        self.itemWidth = [[UIScreen mainScreen] bounds].size.width / viewControllers.count;
-        
-        _topSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 0)];
-        self.topSuperView.clipsToBounds = YES;
-        self.topSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        _moveTopViewByGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveTopViewByGesture:)];
-
-        [self.topSuperView addGestureRecognizer:self.moveTopViewByGesture];
-
-
-        _middleSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, [UIScreen mainScreen].bounds.size.width, 0)];
-        self.middleSuperView.clipsToBounds = YES;
-        self.middleSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-
-        _bottomSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, [UIScreen mainScreen].bounds.size.width, 0)];
-        self.bottomSuperView.clipsToBounds = YES;
-        self.bottomSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-
-        
-        _viewControllers = viewControllers;
-//        调用后可能会照成[UIApplication sharedApplication]。keyWindow为空
-//        [self view];
+        [self setup];
     }
     return self;
 }
+
+- (instancetype)initWithTitle:(NSString *)title viewControllers:(NSArray<UIViewController *> *)viewControllers{
+    self = [super init];
+    if (self) {
+        self.title = title;
+        _viewControllers = viewControllers;
+
+        [self setup];
+
+        //        调用后可能会照成[UIApplication sharedApplication]。keyWindow为空
+        //        [self view];
+    }
+    return self;
+}
+
+- (void)setup{
+
+
+    self.selectColor = [UIColor redColor];
+    self.commonColor = [UIColor blackColor];
+
+
+
+    self.titleFont = [UIFont systemFontOfSize:14];
+    self.selectTitleZoomMultiple = 1.0;
+
+    self.itemHeight = 50;
+    self.itemSpace = 50;
+    self.itemMarginLR = 10;
+    self.minItemWidth = 90;
+
+    if (self.viewControllers.count > 0) {
+        self.itemWidth = [[UIScreen mainScreen] bounds].size.width / self.viewControllers.count;
+    }else{
+        self.itemWidth = [[UIScreen mainScreen] bounds].size.width;
+    }
+
+    _topSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 0)];
+    self.topSuperView.clipsToBounds = YES;
+    self.topSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+
+    _middleSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, [UIScreen mainScreen].bounds.size.width, 0)];
+    self.middleSuperView.clipsToBounds = YES;
+    self.middleSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+
+    _bottomSuperView = [[UIView alloc] initWithFrame:CGRectMake(0, self.itemHeight, [UIScreen mainScreen].bounds.size.width, 0)];
+    self.bottomSuperView.clipsToBounds = YES;
+    self.bottomSuperView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+
+}
+
+
+- (void)reloadInitialUI{
+
+    UIFontDescriptor *ctFont = self.titleFont.fontDescriptor;
+
+    NSNumber *fontString = [ctFont objectForKey:@"NSFontSizeAttribute"];
+
+    _titleSize = [fontString floatValue];
+
+    for (UIButton *but in self.headScrollView.subviews) {
+        if ([but isKindOfClass:[UIButton class]]) {
+            if (but.tag - 1 == self.displayIndex) {
+                but.titleLabel.font = [but.titleLabel.font fontWithSize:self.titleSize * self.selectTitleZoomMultiple];
+            }else{
+                but.titleLabel.font = [but.titleLabel.font fontWithSize:self.titleSize];
+            }
+        }
+
+    }
+
+
+    for (UIButton *but in self.headScrollView.subviews) {
+        if ([but isKindOfClass:[UIButton class]]) {
+            if (but.tag - 1 == self.displayIndex) {
+                [but setTitleColor:RGBA(self.selectR,self.selectG,self.selectB,self.selectA) forState:UIControlStateNormal];
+            }else{
+                [but setTitleColor:RGBA(self.commonR,self.commonG,self.commonB,self.commonA) forState:UIControlStateNormal];
+            }
+        }
+
+    }
+
+    self.markLine.backgroundColor = self.selectColor;
+
+}
+
+- (void)reloadViewControllers:(NSArray<UIViewController *> *)viewControllers{
+
+    if (viewControllers == _viewControllers && self.bodyView.subviews.count > 0) {
+        return;
+    }
+
+    [_viewControllers enumerateObjectsUsingBlock:^(UIViewController * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj.view removeFromSuperview];
+        [obj removeFromParentViewController];
+    }];
+
+
+    _viewControllers = viewControllers;
+    //    [self.moveTopViewByGesture removeTarget:self action:@selector(moveTopViewByGesture:)];
+    //
+    //    [self.headView removeFromSuperview];
+    //    [self.headScrollView removeFromSuperview];
+    //    [self.markLine removeFromSuperview];
+    //    [self.bodyView removeFromSuperview];
+
+
+    if (viewControllers.count > 0) {
+        self.headView.hidden = self.viewControllers.count <= 0;
+        [self.headView mas_updateConstraints:^(MASConstraintMaker *make) {
+            if (self.viewControllers.count <= 1) {
+                make.height.mas_equalTo(0);
+            }else{
+                make.height.mas_equalTo(self.itemHeight);
+            }
+        }];
+
+        [self reloadView];
+
+    }
+}
+
 
 
 - (void)setTopView:(UIView *)topView{
@@ -133,9 +233,9 @@
         [self.middleSuperView mas_updateConstraints:^(MASConstraintMaker *make) {
             make.height.mas_equalTo(middleView.bounds.size.height);
         }];
-        
+
     }
-    
+
 }
 
 
@@ -171,9 +271,9 @@
 
         }];
 
-        
+
     }
-    
+
 }
 
 
@@ -185,11 +285,18 @@
     self.view.backgroundColor = [UIColor whiteColor];
 
     self.itemWidth = self.itemWidth < self.minItemWidth ? self.minItemWidth : self.itemWidth;
-    
-    [self creationView];
-    [self reloadView];
-    
+
+    [self createView];
+
+    [self reloadViewControllers:self.viewControllers];
 }
+
+-(void)setDisplayIndex:(NSInteger)displayIndex{
+    //    _displayIndex = displayIndex; 在[self bodyViewMoveToIndex:displayIndex animated:YES]；里会赋值，这里不需要
+    [self headVoewMoveToIndex:displayIndex animated:YES];
+    [self bodyViewMoveToIndex:displayIndex animated:YES];
+}
+
 
 - (UIView *)displayView{
     return _displayView;
@@ -209,17 +316,7 @@
     self.commonB = components[2];
     self.commonA = components[3];
 
-    
-    for (UIButton *but in self.headScrollView.subviews) {
-        if ([but isKindOfClass:[UIButton class]]) {
-            if (but.tag - 1 == self.displayIndex) {
-                [but setTitleColor:RGBA(self.selectR,self.selectG,self.selectB,self.selectA) forState:UIControlStateNormal];
-            }else{
-                [but setTitleColor:RGBA(self.commonR,self.commonG,self.commonB,self.commonA) forState:UIControlStateNormal];
-            }
-        }
-        
-    }
+    [self reloadInitialUI];
 }
 
 
@@ -232,21 +329,8 @@
     self.selectB = components[2];
     self.selectA = components[3];
 
-    
-    for (UIButton *but in self.headScrollView.subviews) {
-        if ([but isKindOfClass:[UIButton class]]) {
-            if (but.tag - 1 == self.displayIndex) {
-                [but setTitleColor:RGBA(self.selectR,self.selectG,self.selectB,self.selectA) forState:UIControlStateNormal];
-            }else{
-                [but setTitleColor:RGBA(self.commonR,self.commonG,self.commonB,self.commonA) forState:UIControlStateNormal];
-            }
-        }
-        
-    }
-    self.markLine.backgroundColor = selectColor;
+    [self reloadInitialUI];
 
-    
-    
 }
 
 
@@ -264,25 +348,26 @@
     CGContextFillRect(context, CGRectMake(0, 0, 1, 1));
     CGContextRelease(context);
     CGColorSpaceRelease(rgbColorSpace);
-    
+
     for (int component = 0; component < 4; component++) {
         components[component] = resultingPixel[component];
     }
 }
 
 
+- (void)setTitleFont:(UIFont *)titleFont{
+    _titleFont = titleFont;
+    [self reloadInitialUI];
+}
+
+- (CGFloat)titleSize{
+    return _titleSize;
+}
+
+
 - (void)setSelectTitleZoomMultiple:(CGFloat)selectTitleZoomMultiple{
     _selectTitleZoomMultiple = selectTitleZoomMultiple;
-    for (UIButton *but in self.headScrollView.subviews) {
-        if ([but isKindOfClass:[UIButton class]]) {
-            if (but.tag - 1 == self.displayIndex) {
-                but.titleLabel.font = [but.titleLabel.font fontWithSize:self.titleSize * self.selectTitleZoomMultiple];
-            }else{
-                but.titleLabel.font = [but.titleLabel.font fontWithSize:self.titleSize];
-            }
-        }
-        
-    }
+    [self reloadInitialUI];
 }
 
 
@@ -292,14 +377,14 @@
 }
 
 /*
-#pragma mark - Navigation
+ #pragma mark - Navigation
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
 
 - (void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
@@ -318,33 +403,34 @@
     self.navigationController.interactivePopGestureRecognizer.enabled = YES;
 }
 
-- (void)creationView{
-    
+- (void)createView{
+
+    _moveTopViewByGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveTopViewByGesture:)];
+
+    [self.view addGestureRecognizer:self.moveTopViewByGesture];
+
     _headView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.itemHeight)];
     self.headView.clipsToBounds = YES;
     self.headView.backgroundColor = [UIColor whiteColor];
     self.headView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    self.headView.hidden = self.viewControllers.count == 1;
     [self.view addSubview:self.headView];
-    
+
     _headScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, self.headView.frame.size.width, self.headView.frame.size.height)];
     [self.headScrollView setShowsHorizontalScrollIndicator:NO];
     [self.headScrollView setShowsVerticalScrollIndicator:NO];
 
-    self.headScrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-    self.headScrollView.tag = 999;
     [self.headView addSubview:self.headScrollView];
-    
-    self.markLine = [UIImageView new];
+
+    _markLine = [UIView new];
     self.markLine.backgroundColor = self.selectColor;
     self.markLine.tag = 999;
-    [self.headScrollView addSubview:self.markLine];
+    [self.headScrollView insertSubview:self.markLine atIndex:1];
 
-    
+
     _bodyView = [[UIScrollView alloc] initWithFrame:CGRectMake(0,
-                                                                   CGRectGetMaxY(self.middleSuperView.frame),
-                                                                   self.view.frame.size.width,
-                                                                   self.view.frame.size.height - CGRectGetMaxY(self.middleSuperView.frame))];
+                                                               CGRectGetMaxY(self.middleSuperView.frame),
+                                                               self.view.frame.size.width,
+                                                               self.view.frame.size.height - CGRectGetMaxY(self.middleSuperView.frame))];
     [self.bodyView setShowsHorizontalScrollIndicator:NO];
     [self.bodyView setShowsVerticalScrollIndicator:NO];
     self.bodyView.delegate = self;
@@ -360,7 +446,7 @@
 
     [self.view addSubview:self.bottomSuperView];
 
-    
+
     UIImageView *lineImage = [[UIImageView alloc] init];
     lineImage.backgroundColor = [UIColor lightGrayColor];
     [self.headView addSubview:lineImage];
@@ -374,52 +460,52 @@
         make.top.equalTo(self.view);
         make.height.mas_equalTo(self.topView.bounds.size.height);
     }];
-    
-    
+
     [self.headView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.and.left.equalTo(self.view);
         make.top.equalTo(self.topSuperView.mas_bottom);
-        if (self.viewControllers.count == 1) {
-            make.height.mas_equalTo(0);
-        }else{
-            make.height.mas_equalTo(self.itemHeight);
-        }
+        make.height.mas_equalTo(self.itemHeight);
     }];
-    
 
-    
+
+
     [self.headScrollView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self.headView);
     }];
-    
+
     [self.middleSuperView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.and.left.equalTo(self.view);
         make.top.equalTo(self.headView.mas_bottom);
         make.height.mas_equalTo(self.middleView.bounds.size.height);
     }];
-    
+
     [self.bodyView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(self.middleSuperView.mas_bottom);
         make.right.and.left.equalTo(self.view);
         make.bottom.equalTo(self.bottomSuperView.mas_top);
 
     }];
-    
-    
+
+
     [self.bottomSuperView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.and.left.equalTo(self.view);
         make.height.mas_equalTo(self.bottomView.bounds.size.height);
-        if (@available(iOS 11.0, *)) {
-            UIWindow *window = [UIApplication sharedApplication].windows.firstObject;
-            make.bottom.equalTo(self.view).offset(-window.safeAreaInsets.bottom);
-        } else {
+        if (self.bottomView) {
+            if (@available(iOS 11.0, *)) {
+                UIWindow *window = [UIApplication sharedApplication].windows.firstObject;
+                make.bottom.equalTo(self.view).offset(-window.safeAreaInsets.bottom);
+            } else {
+                make.bottom.equalTo(self.view).offset(0);
+            }
+        }else{
             make.bottom.equalTo(self.view).offset(0);
         }
+
     }];
-    
-  
-    
-    
+
+
+
+
 }
 
 - (void)moveTopViewByScrollView:(UIScrollView *)scrollView{
@@ -469,23 +555,24 @@
 
 
 - (void)reloadView{
-    
+
     for (UIView *view in self.headScrollView.subviews) {
         if ([view isKindOfClass:[UIButton class]]) {
             [view removeFromSuperview];
         }
     }
-    
+
     for (UIView *view in self.bodyView.subviews) {
         [view removeFromSuperview];
     }
-    
+
+
     self.allHeadItemX = 0;
-//    [self bodyViewSubView:0];
+    //    [self bodyViewSubView:0];
     CGFloat contentWidth = self.viewControllers.count * self.bodyView.frame.size.width;
     self.bodyView.contentSize = CGSizeMake(contentWidth, 0);
 
-    
+
     for (NSInteger i = 0; i < self.viewControllers.count; i ++) {
         [self headScrollViewSubView:i];
         [self bodyViewSubView:i];
@@ -494,7 +581,7 @@
 
     [self headVoewMoveToIndex:self.displayIndex animated:NO];
     [self bodyViewMoveToIndex:self.displayIndex animated:NO];
-    
+
     UIViewController *vc = [self.viewControllers firstObject];
     self.navigationItem.rightBarButtonItem = vc.navigationItem.rightBarButtonItem;
 }
@@ -504,38 +591,54 @@
     UIViewController *VC = [self.viewControllers objectAtIndex:index];
     self.navigationItem.rightBarButtonItem = VC.navigationItem.rightBarButtonItem;
     UIButton *but = [UIButton buttonWithType:UIButtonTypeCustom];
-    but.titleLabel.font = [but.titleLabel.font fontWithSize:self.titleSize];
+    but.titleLabel.font = self.titleFont;
 
     //    but.titleLabel.adjustsFontSizeToFitWidth = YES;
-    
+
     [but setTitle:VC.title forState:UIControlStateNormal];
-    
+
     [but addTarget:self action:@selector(changeCategory:) forControlEvents:UIControlEventTouchUpInside];
     but.tag = index + 1;
-    
-    CGFloat itemWidth = self.itemWidth;
-    but.frame = CGRectMake(self.allHeadItemX, 0, itemWidth, self.itemHeight);
-    self.allHeadItemX += itemWidth;
 
-    [self.headScrollView addSubview:but];
+    CGFloat itemWidth = self.itemWidth;
+    CGFloat itemSpace = 0;
+
+    if (self.itemWidthStyle == ItemEqualSpacing) {
+        itemWidth = [but sizeThatFits:CGSizeMake(MAXFLOAT, but.titleLabel.font.lineHeight)].width;
+        if (index > 0) {
+            itemSpace = self.itemSpace;
+        }else{
+            itemSpace = self.itemMarginLR;
+        }
+
+    }
+
+    but.frame = CGRectMake(self.allHeadItemX + itemSpace, 0, itemWidth, self.itemHeight);
+    self.allHeadItemX += (itemWidth + itemSpace);
+
+    if (index == self.viewControllers.count - 1 && self.itemWidthStyle == ItemEqualSpacing) {
+        self.allHeadItemX += self.itemMarginLR;
+    }
+
+    [self.headScrollView insertSubview:but belowSubview:self.markLine];
     if ([self.delegate respondsToSelector:@selector(pageViewController:titleItem:)]) {
         [self.delegate pageViewController:self titleItem:but];
     }
-    
-    
+
+
     if (index == self.displayIndex) {
         CGRect btnRect = but.frame;
         self.markLine.frame = CGRectMake(CGRectGetMinX(btnRect), CGRectGetMaxY(btnRect) - 2, CGRectGetWidth(btnRect), 2);
         [but setTitleColor:RGBA(self.selectR,self.selectG,self.selectB,self.selectA) forState:UIControlStateNormal];
         but.titleLabel.font = [but.titleLabel.font fontWithSize:self.titleSize * self.selectTitleZoomMultiple];
 
-        
+
     }else{
         [but setTitleColor:RGBA(self.commonR,self.commonG,self.commonB,self.commonA) forState:UIControlStateNormal];
         but.titleLabel.font = [but.titleLabel.font fontWithSize:self.titleSize];
     }
-    
-    
+
+
     CGFloat contentWidth = self.allHeadItemX;
     if (contentWidth <= self.view.frame.size.width) {
         contentWidth = self.view.frame.size.width + 1;
@@ -552,7 +655,7 @@
 
 
 - (void)bodyViewSubView:(NSInteger)index{
-    
+
     UIViewController *vc = [self.viewControllers objectAtIndex:index];
     UIView *view = vc.view;
     view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -560,20 +663,35 @@
                             0,
                             self.bodyView.frame.size.width,
                             self.bodyView.frame.size.height);
-    view.tag = index + 1;
-    
-    [self.bodyView addSubview:view];
-    [self addChildViewController:vc];
-    
+
+    UIImageView *imageView = [[UIImageView alloc] init];
+    imageView.tag = index + 1;
+    [self.bodyView addSubview:imageView];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIImage *image = [view dp_imageForView];
+        imageView.image = image;
+        imageView.frame = CGRectMake(view.frame.origin.x,
+                                     view.frame.origin.y,
+                                     image.size.width,
+                                     image.size.height);
+
+    });
+
+
+    //    if (index == self.displayIndex) {
+    //        [self.bodyView addSubview:view];
+    //        [self addChildViewController:vc];
+    //    }
+
 }
 
 
 
 - (void)headVoewMoveToItem:(UIButton *)item animated:(BOOL)animated{
-    
+
     CGFloat CItemPointX = CGRectGetMidX([item.superview convertRect:item.frame toView:self.view]);
     CGFloat CHeadPointX = CGRectGetMidX([self.headScrollView.superview convertRect:self.headScrollView.frame toView:self.view]);
-    
+
     CGFloat offsetX = self.headScrollView.contentOffset.x + (CItemPointX - CHeadPointX);
     if (offsetX <= 0) {
         offsetX = 0;
@@ -581,32 +699,23 @@
     if (offsetX >= self.headScrollView.contentSize.width - self.headScrollView.frame.size.width) {
         offsetX = self.headScrollView.contentSize.width - self.headScrollView.frame.size.width;
     }
-    
-    
+
+
     [self.headScrollView setContentOffset:CGPointMake(offsetX, self.headScrollView.contentOffset.y) animated:animated];
 
 }
 
 - (void)headVoewMoveToIndex:(NSInteger)index animated:(BOOL)animated{
-    
-    
+
+
     [self headVoewMoveToItem:(UIButton *)[self.headScrollView viewWithTag:index + 1] animated:animated];
-    
+
 }
 
 
 - (void)bodyViewMoveToIndex:(NSInteger)index animated:(BOOL)animated{
-    
-    UIView *markView = nil;
-    for (UIView *view in self.bodyView.subviews) {
-        if (view.tag == index + 1) {
-            markView = view;
-        }
-    }
-    
-    if (markView == nil) {
-        [self bodyViewSubView:index];
-    }
+
+
     float vButtonOrigin = index * self.bodyView.frame.size.width;
     [self.bodyView setContentOffset:CGPointMake(vButtonOrigin, self.bodyView.contentOffset.y) animated:animated];
     [self changeDisplayViewController:index];
@@ -615,25 +724,49 @@
 
 - (void)changeDisplayViewController:(NSInteger)index{
 
-    UIViewController *disVC = [self.viewControllers objectAtIndex:self.displayIndex];
-    [disVC viewWillDisappear:YES];
-    [disVC viewDidDisappear:YES];
 
-    self.displayIndex = index;
+    if (index != self.displayIndex) {
+        UIViewController *disVC = [self.viewControllers objectAtIndex:self.displayIndex];
+        UIImageView *imageView = [self.bodyView viewWithTag:self.displayIndex + 1];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UIImage *image = [disVC.view dp_imageForView];
+            imageView.frame = CGRectMake(disVC.view.frame.origin.x,
+                                         disVC.view.frame.origin.y,
+                                         image.size.width,
+                                         image.size.height);
+            imageView.image = image;
+        });
+
+        [disVC.view removeFromSuperview];
+        [disVC removeFromParentViewController];
+    }
+
+
+    [self.bodyView viewWithTag:self.displayIndex + 1].hidden = NO;
+
+
+    _displayIndex = index;
     if ([self.delegate respondsToSelector:@selector(pageViewController:displayIndex:)]) {
         [self.delegate pageViewController:self displayIndex:index];
     }
 
-    for (UIView *view in self.bodyView.subviews) {
-        if (view.tag == index + 1) {
-            _displayView = view;
-            break;
-        }
-    }
-
     UIViewController *apperVC = [self.viewControllers objectAtIndex:self.displayIndex];
-    [apperVC viewWillAppear:YES];
-    [apperVC viewDidAppear:YES];
+    [self.bodyView addSubview:apperVC.view];
+    [self addChildViewController:apperVC];
+    _displayView = apperVC.view;
+
+    apperVC.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    apperVC.view.frame = CGRectMake(index * self.bodyView.frame.size.width,
+                                    0,
+                                    self.bodyView.frame.size.width,
+                                    self.bodyView.frame.size.height);
+    UIImageView *imageView = [self.bodyView viewWithTag:self.displayIndex + 1];
+    //    imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    //    imageView.frame = apperVC.view.frame;
+    imageView.hidden = YES;
+
+
+
 }
 
 
@@ -646,11 +779,8 @@
 }
 
 
-- (void)changeView:(float)x
+- (void)changeView:(CGFloat)x
 {
-    CGFloat xx = x * (self.itemWidth / self.bodyView.frame.size.width);
-    
-    CGFloat startX = xx;
     //    float endX = xx + MENU_BUTTON_WIDTH;
     NSInteger sT = (x)/self.bodyView.frame.size.width + 1;
     if (sT <= 0)
@@ -658,7 +788,7 @@
         return;
     }
     for (UIButton *but in self.headScrollView.subviews) {
-        
+
         if ([but isKindOfClass:[UIButton class]]) {
             if (but.tag == sT || but.tag == sT + 1 || but.tag == sT - 1) {
                 continue;
@@ -667,55 +797,68 @@
                                     self.commonG,
                                     self.commonB,
                                     self.commonA) forState:UIControlStateNormal];
-            
+
             but.titleLabel.font = [but.titleLabel.font fontWithSize:self.titleSize];
 
 
         }
-        
+
     }
-    
-    
-    UIButton *btn = (UIButton *)[self.headScrollView viewWithTag:sT];
-    float percent = (startX - self.itemWidth * (sT - 1))/self.itemWidth;
-    [btn setTitleColor:RGBA([self colorChangelerp:percent start:self.selectR to:self.commonR],
-                            [self colorChangelerp:percent start:self.selectG to:self.commonG],
-                            [self colorChangelerp:percent start:self.selectB to:self.commonB],
-                            [self colorChangelerp:percent start:self.selectA to:self.commonA]) forState:UIControlStateNormal];
-    
 
-    
+    UIButton *startBtn = (UIButton *)[self.headScrollView viewWithTag:sT];
+    UIButton *toBtn = (UIButton *)[self.headScrollView viewWithTag:sT + 1];
+
+
+    CGFloat itemWidth = startBtn.frame.size.width;
+
+    CGFloat xx = x * (itemWidth / self.bodyView.frame.size.width);
+
+    CGFloat startX = xx;
+
+    CGFloat percent = (startX - itemWidth * (sT - 1))/itemWidth;
+    [startBtn setTitleColor:RGBA([self colorChangelerp:percent start:self.selectR to:self.commonR],
+                                 [self colorChangelerp:percent start:self.selectG to:self.commonG],
+                                 [self colorChangelerp:percent start:self.selectB to:self.commonB],
+                                 [self colorChangelerp:percent start:self.selectA to:self.commonA]) forState:UIControlStateNormal];
+
+
+
     CGFloat btnS = [self colorChangelerp:percent start:self.titleSize * self.selectTitleZoomMultiple to:self.titleSize];
-    btn.titleLabel.font = [btn.titleLabel.font fontWithSize:btnS];
+    startBtn.titleLabel.font = [startBtn.titleLabel.font fontWithSize:btnS];
 
 
-    NSInteger w = self.itemWidth;
+    NSInteger w = itemWidth;
     if((NSInteger)xx%w == 0)
         return;
-    UIButton *btn2 = (UIButton *)[self.headScrollView viewWithTag:sT + 1];
-    [btn2 setTitleColor:RGBA([self colorChangelerp:percent start:self.commonR to:self.selectR],
-                             [self colorChangelerp:percent start:self.commonG to:self.selectG],
-                             [self colorChangelerp:percent start:self.commonB to:self.selectB],
-                             [self colorChangelerp:percent start:self.commonA to:self.selectA]) forState:UIControlStateNormal];
-    
-    
+    [toBtn setTitleColor:RGBA([self colorChangelerp:percent start:self.commonR to:self.selectR],
+                              [self colorChangelerp:percent start:self.commonG to:self.selectG],
+                              [self colorChangelerp:percent start:self.commonB to:self.selectB],
+                              [self colorChangelerp:percent start:self.commonA to:self.selectA]) forState:UIControlStateNormal];
+
+
     CGFloat btnS2 = [self colorChangelerp:percent start:self.titleSize to:self.titleSize * self.selectTitleZoomMultiple];
-    btn2.titleLabel.font = [btn2.titleLabel.font fontWithSize:btnS2];
+    toBtn.titleLabel.font = [toBtn.titleLabel.font fontWithSize:btnS2];
 
-    
-    
-    CGRect btn1Rect = btn.frame;
 
-    CGRect btn2Rect = btn2.frame;
-    
-    self.markLine.frame = CGRectMake([self colorChangelerp:percent start:CGRectGetMinX(btn1Rect) to:CGRectGetMinX(btn2Rect)],
+
+    CGRect btn1Rect = startBtn.frame;
+
+    CGRect btn2Rect = toBtn.frame;
+
+
+
+    self.markLine.frame = CGRectMake([self colorChangelerp:percent
+                                                     start:CGRectGetMinX(btn1Rect)
+                                                        to:CGRectGetMinX(btn2Rect)],
                                      CGRectGetMaxY(btn1Rect) - 2,
-                                     [self colorChangelerp:percent start:CGRectGetWidth(btn1Rect) to:CGRectGetWidth(btn2Rect)],
+                                     [self colorChangelerp:percent
+                                                     start:CGRectGetWidth(btn1Rect)
+                                                        to:CGRectGetWidth(btn2Rect)],
                                      2);
-    
-    
 
-    
+
+
+
 }
 
 - (CGFloat)colorChangelerp:(CGFloat)percent start:(CGFloat)start to:(CGFloat)to{
@@ -728,25 +871,14 @@
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
     [self changeView:scrollView.contentOffset.x];
 
-    
+
     NSInteger index = scrollView.contentOffset.x / self.view.frame.size.width;
-    
-    UIView *markView = nil;
-    for (UIView *view in self.bodyView.subviews) {
-        if (view.tag == index + 1) {
-            markView = view;
-        }
-    }
-    
-    if (markView == nil) {
-        [self bodyViewSubView:index];
-    }
-    
-    
+
+
     [self headVoewMoveToIndex:index animated:YES];
-    
+
     [self changeDisplayViewController:index];
-    
+
 }
 
 
@@ -755,4 +887,28 @@
 
 }
 
+- (void)cx_getRGBComponents:(CGFloat [4])cmp forColor:(UIColor *)color {
+    CGColorSpaceRef spaceRef = CGColorSpaceCreateDeviceRGB();
+    unsigned char resultPixel[4];
+    CGContextRef ctx = CGBitmapContextCreate(&resultPixel, 1, 1, 8, 4, spaceRef, kCGImageAlphaNoneSkipLast);
+    CGContextSetFillColorWithColor(ctx, [color CGColor]);
+    CGContextFillRect(ctx, CGRectMake(0, 0, 1, 1));
+    CGContextRelease(ctx);
+    CGColorSpaceRelease(spaceRef);
+
+    for (int i = 0; i < 4; i++) {
+        cmp[i] = resultPixel[i] / 255.0;
+    }
+}
+
+- (UIImage *)getViewImage:(CALayer *)layer size:(CGSize)size{
+    UIGraphicsBeginImageContextWithOptions(size, NO, 0.0);
+    [layer renderInContext:UIGraphicsGetCurrentContext()];
+    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return image;
+}
+
 @end
+
+
