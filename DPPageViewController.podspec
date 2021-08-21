@@ -42,5 +42,5 @@ DPPageViewController *pagevc = [[DPPageViewController alloc] initWithTitle:@"Pag
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
-    s.dependency 'Masonry', '1.0.2'
+    s.dependency 'Masonry'
 end
